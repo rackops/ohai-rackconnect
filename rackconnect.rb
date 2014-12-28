@@ -1,5 +1,6 @@
 require 'net/http'
 require 'mixlib/shellout'
+require 'json'
 
 Ohai.plugin(:Rackconnect) do
   provides 'rackspace/rackconnect'
