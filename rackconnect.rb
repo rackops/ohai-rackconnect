@@ -23,6 +23,9 @@ Ohai.plugin(:Rackconnect) do
     http.use_ssl = true
     response = http.get(uri.request_uri)
 
+    ## Raise an exception to be caught if the server returns a 500 error
+    raise 'server error' if response.code.to_i >= 500
+
     if response.code == '200'
       json_response = JSON.parse(response.body)
 
