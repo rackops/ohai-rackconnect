@@ -11,8 +11,8 @@ Ohai.plugin(:Rackconnect) do
   end
 
   def create_objects
-    rack_connect Mash.new
-    rack_connect[:enabled] = false
+    rackconnect Mash.new
+    rackconnect[:enabled] = false
   end
 
   def rackconnect_api
@@ -25,9 +25,9 @@ Ohai.plugin(:Rackconnect) do
     if response.code == '200'
       json_response = JSON.parse(response.body)
 
-      rack_connect[:enabled] = true
+      rackconnect[:enabled] = true
       if json_response.key? 'automation_status'
-        rack_connect[:automation_status] = json_response['automation_status']
+        rackconnect[:automation_status] = json_response['automation_status']
       end
     end
   end
@@ -39,11 +39,11 @@ Ohai.plugin(:Rackconnect) do
     cmd = Mixlib::Shellout.new("#{xenstore_cmd} #{rackconnect_metadata}")
     cmd.run_command
     if cmd.stderr == ''
-      rack_connect[:enabled] = true
+      rackconnect[:enabled] = true
 
       ## Command returns "\"DEPLOYED\"\n" so lets remove the extra
       automation_status = cmd.stdout.chomp.gsub('"', '')
-      rack_connect[:automation_status] = automation_status
+      rackconnect[:automation_status] = automation_status
     end
   end
 
@@ -57,6 +57,7 @@ Ohai.plugin(:Rackconnect) do
       rescue
         xenstore_api
       end
+      rackspace[:rackconnect] = rackconnect
     end
   end
 end
