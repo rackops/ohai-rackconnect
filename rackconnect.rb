@@ -36,7 +36,7 @@ Ohai.plugin(:Rackconnect) do
     xenstore_cmd = '/usr/bin/xenstore-read'
     rackconnect_metadata = 'vm-data/user-metadata/rackconnect_automation_status'
 
-    cmd = Mixlib::Shellout.new("#{xenstore_cmd} #{rackconnect_metadata}")
+    cmd = Mixlib::ShellOut.new("#{xenstore_cmd} #{rackconnect_metadata}")
     cmd.run_command
     if cmd.stderr == ''
       rackconnect[:enabled] = true
