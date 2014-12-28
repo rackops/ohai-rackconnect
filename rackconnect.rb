@@ -15,8 +15,8 @@ Ohai.plugin(:Rackconnect) do
     rack_connect[:enabled] = false
   end
 
-  def rackconnect_api(region)
-    uri = URI.parse("https://#{region}.api.rackconnect.rackspace.com/v1/automation_status/details")
+  def rackconnect_api
+    uri = URI.parse("https://#{rackspace[:region]}.api.rackconnect.rackspace.com/v1/automation_status/details")
 
     http = Net::HTTP.new(uri.host, uri.port)
     http.use_ssl = true
