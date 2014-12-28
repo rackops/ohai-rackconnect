@@ -42,7 +42,8 @@ Ohai.plugin(:Rackconnect) do
 
     cmd = Mixlib::ShellOut.new("#{xenstore_cmd} #{rackconnect_metadata}")
     cmd.run_command
-    if cmd.stderr == ''
+
+    if cmd.stderr.empty?
       rackconnect[:enabled] = true
 
       ## Command returns "\"DEPLOYED\"\n" so lets remove the extra
@@ -52,7 +53,6 @@ Ohai.plugin(:Rackconnect) do
   end
 
   collect_data(:linux) do
-
     ## No support for dedicated and private clouds
     if pub_cloud?
       create_objects
