@@ -1,5 +1,4 @@
 require 'net/http'
-require 'mixlib/shellout'
 require 'json'
 
 Ohai.plugin(:Rackconnect) do
@@ -17,39 +16,38 @@ Ohai.plugin(:Rackconnect) do
   end
 
   def rackconnect_api
-    uri = URI.parse("https://#{rackspace[:region]}.api.rackconnect.rackspace.com/v1/automation_status/details")
+    url = "https://#{rackspace[:region]}.api.rackconnect.rackspace.com"
+    urn = '/v1/automation_status/details'
+    uri = URI.parse(URI.join(url, urn))
 
     http = Net::HTTP.new(uri.host, uri.port)
     http.use_ssl = true
     response = http.get(uri.request_uri)
 
     ## Raise an exception to be caught if the server returns a 500 error
-    raise 'server error' if response.code.to_i >= 500
+    fail 'server error' if response.code.to_i >= 500
 
-    if response.code == '200'
-      json_response = JSON.parse(response.body)
+    return unless response.code == '200'
+    json_response = JSON.parse(response.body)
 
-      rackconnect[:enabled] = true
-      if json_response.key? 'automation_status'
-        rackconnect[:automation_status] = json_response['automation_status']
-      end
-    end
+    rackconnect[:enabled] = true
+
+    return unless json_response.key? 'automation_status'
+    rackconnect[:automation_status] = json_response['automation_status']
   end
 
   def xenstore_api
     xenstore_cmd = '/usr/bin/xenstore-read'
     rackconnect_metadata = 'vm-data/user-metadata/rackconnect_automation_status'
 
-    cmd = Mixlib::ShellOut.new("#{xenstore_cmd} #{rackconnect_metadata}")
-    cmd.run_command
+    res = shell_out("#{xenstore_cmd} #{rackconnect_metadata}")
 
-    if cmd.stderr.empty?
-      rackconnect[:enabled] = true
+    return unless res.stderr.empty?
+    rackconnect[:enabled] = true
 
-      ## Command returns "\"DEPLOYED\"\n" so lets remove the extra
-      automation_status = cmd.stdout.chomp.gsub('"', '')
-      rackconnect[:automation_status] = automation_status
-    end
+    ## Command returns "\"DEPLOYED\"\n" so lets remove the extra
+    automation_status = res.stdout.chomp.gsub('"', '')
+    rackconnect[:automation_status] = automation_status
   end
 
   collect_data(:linux) do
