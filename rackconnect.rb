@@ -42,11 +42,10 @@ Ohai.plugin(:Rackconnect) do
     return if xenstore_v2
 
     xenstore_cmd = '/usr/bin/xenstore-read'
-    rackconnect_metadata = 'vm-data/user-metadata/rax_service_level_automation'
+    rackconnect_metadata = 'vm-data/provider-data/roles'
 
     res = shell_out("#{xenstore_cmd} #{rackconnect_metadata}")
-
-    return unless res.stderr.empty?
+    return unless res.stderr.empty? && res.stdout.include?('rackconnect:v3')
     rackconnect[:enabled] = true
     rackconnect[:version] = 3
   end
