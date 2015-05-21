@@ -45,7 +45,7 @@ Ohai.plugin(:Rackconnect) do
 
     res = shell_out("#{xenstore_cmd} #{rackconnect_metadata}")
 
-    return if res.stderr.empty?
+    return unless res.stderr.empty?
     rackconnect[:enabled] = true
     rackconnect[:version] = 3
   end
@@ -55,7 +55,7 @@ Ohai.plugin(:Rackconnect) do
     rackconnect_metadata = 'vm-data/user-metadata/rackconnect_automation_status'
 
     res = shell_out("#{xenstore_cmd} #{rackconnect_metadata}")
-    return false if res.stderr.empty?
+    return false unless res.stderr.empty?
     rackconnect[:enabled] = true
     rackconnect[:version] = 2
 
