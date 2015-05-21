@@ -31,23 +31,39 @@ Ohai.plugin(:Rackconnect) do
     json_response = JSON.parse(response.body)
 
     rackconnect[:enabled] = true
+    rackconnect[:version] = 2
 
     return unless json_response.key? 'automation_status'
     rackconnect[:automation_status] = json_response['automation_status']
   end
 
   def xenstore_api
+    return if xenstore_v2
+
+    xenstore_cmd = '/usr/bin/xenstore-read'
+    rackconnect_metadata = 'vm-data/user-metadata/rax_service_level_automation'
+
+    res = shell_out("#{xenstore_cmd} #{rackconnect_metadata}")
+
+    return if res.stderr.empty?
+    rackconnect[:enabled] = true
+    rackconnect[:version] = 3
+  end
+
+  def xenstore_v2
     xenstore_cmd = '/usr/bin/xenstore-read'
     rackconnect_metadata = 'vm-data/user-metadata/rackconnect_automation_status'
 
     res = shell_out("#{xenstore_cmd} #{rackconnect_metadata}")
-
-    return unless res.stderr.empty?
+    return false if res.stderr.empty?
     rackconnect[:enabled] = true
+    rackconnect[:version] = 2
 
     ## Command returns "\"DEPLOYED\"\n" so lets remove the extra
     automation_status = res.stdout.chomp.gsub('"', '')
     rackconnect[:automation_status] = automation_status
+
+    true
   end
 
   collect_data(:linux) do
